@@ -42,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,9 +56,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.inventory.R
 import org.koin.androidx.compose.koinViewModel
 import simply.homework.inventory.InventoryTopAppBar
+import simply.homework.inventory.commonpresentation.theme.InventoryTheme
 import simply.homework.inventory.data.entity.Item
 import simply.homework.inventory.presentation.navigation.NavigationDestination
-import simply.homework.inventory.commonpresentation.theme.InventoryTheme
 
 object ItemDetailsDestination : NavigationDestination {
     override val route = "item_details"
@@ -74,6 +75,7 @@ fun ItemDetailsScreen(
     modifier: Modifier = Modifier,
     viewModel: ItemDetailsViewModel = koinViewModel()
 ) {
+    val itemDetailsUiState = viewModel.uiState.collectAsState().value
     Scaffold(
         topBar = {
             InventoryTopAppBar(
@@ -96,9 +98,14 @@ fun ItemDetailsScreen(
         }, modifier = modifier
     ) { innerPadding ->
         ItemDetailsBody(
-            itemDetailsUiState = ItemDetailsUiState(),
-            onSellItem = { },
-            onDelete = { },
+            itemDetailsUiState = itemDetailsUiState,
+            onSellItem = {
+                viewModel.sellItem()
+            },
+            onDelete = {
+                viewModel.deleteItem()
+                navigateBack()
+            },
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
@@ -147,6 +154,7 @@ private fun ItemDetailsBody(
                 onDeleteConfirm = {
                     deleteConfirmationRequired = false
                     onDelete()
+
                 },
                 onDeleteCancel = { deleteConfirmationRequired = false },
                 modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium))

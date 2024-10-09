@@ -1,6 +1,5 @@
 package simply.homework.inventory.presentation.di
 
-import androidx.lifecycle.SavedStateHandle
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import simply.homework.inventory.presentation.home.HomeViewModel
@@ -13,7 +12,4 @@ val presentationModule = module {
     viewModelOf(::ItemDetailsViewModel)
     viewModelOf(::ItemEditViewModel)
     viewModelOf(::ItemEntryViewModel)
-
-    factory { SavedStateHandle() }
-
 }
