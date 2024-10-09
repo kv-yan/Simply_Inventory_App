@@ -3,10 +3,11 @@ package simply.homework.inventory.presentation.item
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import simply.homework.inventory.domain.usecase.DeleteItemUseCase
 import simply.homework.inventory.domain.usecase.GetItemByIdUseCase
@@ -15,33 +16,26 @@ import simply.homework.inventory.domain.usecase.UpdateItemUseCase
 class ItemDetailsViewModel(
     savedStateHandle: SavedStateHandle,
     private val deleteItemUseCase: DeleteItemUseCase,
-    private val getItemByIdUseCase: GetItemByIdUseCase,
+    getItemByIdUseCase: GetItemByIdUseCase,
     private val updateItemUseCase: UpdateItemUseCase
 ) : ViewModel() {
-    private val itemId: Int = checkNotNull(savedStateHandle[ItemDetailsDestination.itemIdArg])
 
-    // MutableStateFlow to hold the UI state
-    private val _uiState = MutableStateFlow(ItemDetailsUiState())
+    private val itemId: Int = checkNotNull(savedStateHandle[ItemDetailsDestination.ITEM_ID_ARG])
 
-    val uiState: StateFlow<ItemDetailsUiState> = _uiState.asStateFlow()
-
-    init {
-        // Launch a coroutine in the ViewModel scope to fetch the item details
-        viewModelScope.launch {
-            getItemByIdUseCase.invoke(itemId) // Fetch the item by its ID
-                .filterNotNull() // Filter out any null values
-                .collect { item ->
-                    // Update the UI state with the fetched item
-                    println(item.toItemDetails())
-                    _uiState.value = ItemDetailsUiState(
-                        outOfStock = item.quantity <= 0, itemDetails = item.toItemDetails()
-                    )
-                }
+    val uiState: StateFlow<ItemDetailsUiState> = getItemByIdUseCase.invoke(itemId)
+        .filterNotNull()
+        .map { item ->
+            ItemDetailsUiState(
+                outOfStock = item.quantity <= 0,
+                itemDetails = item.toItemDetails()
+            )
         }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = ItemDetailsUiState()
+        )
 
-
-    // Function to delete an item
     fun deleteItem() {
         viewModelScope.launch {
             uiState.value.itemDetails.let { itemDetails ->

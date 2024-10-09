@@ -17,6 +17,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -44,6 +46,7 @@ fun ItemEntryScreen(
     canNavigateBack: Boolean = true,
     viewModel: ItemEntryViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.itemUiState.collectAsState()
     Scaffold(
         topBar = {
             InventoryTopAppBar(
@@ -54,7 +57,7 @@ fun ItemEntryScreen(
         }
     ) { innerPadding ->
         ItemEntryBody(
-            itemUiState = viewModel.itemUiState,
+            itemUiState = uiState,
             onItemValueChange = viewModel::updateUiState,
             onSaveClick = {
                 viewModel.saveItem(navigateBack)

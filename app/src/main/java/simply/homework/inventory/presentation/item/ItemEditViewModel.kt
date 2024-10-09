@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import simply.homework.inventory.domain.repo.ItemsRepository
 import simply.homework.inventory.domain.usecase.GetItemByIdUseCase
 import simply.homework.inventory.domain.usecase.UpdateItemUseCase
 
@@ -21,7 +20,7 @@ class ItemEditViewModel(
     var itemUiState by mutableStateOf(ItemUiState())
         private set
 
-    private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.itemIdArg])
+    private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.ITEM_ID_ARG])
 
     fun updateUiState(itemDetails: ItemDetails) {
         itemUiState =

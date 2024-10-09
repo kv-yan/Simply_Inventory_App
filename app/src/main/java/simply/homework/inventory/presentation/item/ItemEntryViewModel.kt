@@ -1,12 +1,12 @@
 package simply.homework.inventory.presentation.item
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import   simply.homework.inventory.data.entity.Item
+import simply.homework.inventory.data.entity.Item
 import simply.homework.inventory.domain.usecase.InsertItemUseCase
 import java.text.NumberFormat
 
@@ -14,15 +14,17 @@ class ItemEntryViewModel(
     private val insertItemUseCase: InsertItemUseCase
 ) : ViewModel() {
 
-    var itemUiState by mutableStateOf(ItemUiState())
-        private set
+    private val _itemUiState = MutableStateFlow(ItemUiState())
+    val itemUiState: StateFlow<ItemUiState> = _itemUiState.asStateFlow()
 
     fun updateUiState(itemDetails: ItemDetails) {
-        itemUiState =
-            ItemUiState(itemDetails = itemDetails, isEntryValid = validateInput(itemDetails))
+        _itemUiState.value = _itemUiState.value.copy(
+            itemDetails = itemDetails,
+            isEntryValid = validateInput(itemDetails)
+        )
     }
 
-    private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
+    private fun validateInput(uiState: ItemDetails = _itemUiState.value.itemDetails): Boolean {
         return with(uiState) {
             name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
         }
@@ -31,10 +33,10 @@ class ItemEntryViewModel(
     fun saveItem(completeAction: () -> Unit) {
         viewModelScope.launch {
             if (validateInput()) {
-                insertItemUseCase.invoke((itemUiState.itemDetails.toItem()))
+                insertItemUseCase.invoke(_itemUiState.value.itemDetails.toItem())
                 completeAction()
             } else {
-                itemUiState = itemUiState.copy(isEntryValid = false)
+                _itemUiState.value = _itemUiState.value.copy(isEntryValid = false)
             }
         }
     }
@@ -70,14 +72,6 @@ fun ItemDetails.toItem(): Item = Item(
 fun Item.formatedPrice(): String {
     return NumberFormat.getCurrencyInstance().format(price)
 }
-
-/**
- * Extension function to convert [Item] to [ItemUiState]
- */
-fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState(
-    itemDetails = this.toItemDetails(),
-    isEntryValid = isEntryValid
-)
 
 /**
  * Extension function to convert [Item] to [ItemDetails]

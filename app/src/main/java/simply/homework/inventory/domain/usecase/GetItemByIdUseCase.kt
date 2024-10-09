@@ -5,9 +5,9 @@ import simply.homework.inventory.data.entity.Item
 import simply.homework.inventory.domain.repo.ItemsRepository
 
 interface GetItemByIdUseCase {
-    suspend fun invoke(id: Int): Flow<Item?>
+    fun invoke(id: Int): Flow<Item?>
 }
 
 class GetItemByIdUseCaseImpl(private val itemsRepository: ItemsRepository) : GetItemByIdUseCase {
-    override suspend fun invoke(id: Int): Flow<Item?> = itemsRepository.getItemStream(id)
+    override fun invoke(id: Int): Flow<Item?> = itemsRepository.getItemStream(id)
 }
