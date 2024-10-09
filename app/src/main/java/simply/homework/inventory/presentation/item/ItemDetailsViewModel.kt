@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import simply.homework.inventory.data.entity.Item
 import simply.homework.inventory.domain.usecase.DeleteItemUseCase
 import simply.homework.inventory.domain.usecase.GetItemByIdUseCase
 import simply.homework.inventory.domain.usecase.UpdateItemUseCase
@@ -35,8 +34,7 @@ class ItemDetailsViewModel(
                     // Update the UI state with the fetched item
                     println(item.toItemDetails())
                     _uiState.value = ItemDetailsUiState(
-                        outOfStock = item.quantity <= 0,
-                        itemDetails = item.toItemDetails()
+                        outOfStock = item.quantity <= 0, itemDetails = item.toItemDetails()
                     )
                 }
         }
@@ -44,11 +42,10 @@ class ItemDetailsViewModel(
 
 
     // Function to delete an item
-    // Function to delete an item
     fun deleteItem() {
         viewModelScope.launch {
             uiState.value.itemDetails.let { itemDetails ->
-                deleteItemUseCase.invoke(itemDetails.toItem()) // Call the use case to delete the item
+                deleteItemUseCase.invoke(itemDetails.toItem())
             }
         }
     }
@@ -57,9 +54,9 @@ class ItemDetailsViewModel(
         viewModelScope.launch {
             uiState.value.itemDetails.let { itemDetails ->
                 val item = itemDetails.toItem()
-//                val newItem = item.copy(quantity = item.quantity - 1) // problem with copy
-                val newItem = Item(item.id, item.name, item.price, item.quantity - 1)
-                updateItemUseCase.invoke(newItem) // Call the use case to delete the item
+                val quantity = if (item.quantity > 0) item.quantity - 1 else 0
+                val newItem = item.copy(quantity = quantity)
+                updateItemUseCase.invoke(newItem)
             }
         }
     }
@@ -73,6 +70,5 @@ class ItemDetailsViewModel(
  * UI state for ItemDetailsScreen
  */
 data class ItemDetailsUiState(
-    val outOfStock: Boolean = true,
-    val itemDetails: ItemDetails = ItemDetails()
+    val outOfStock: Boolean = true, val itemDetails: ItemDetails = ItemDetails()
 )
