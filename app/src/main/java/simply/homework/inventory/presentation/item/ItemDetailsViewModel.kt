@@ -26,7 +26,7 @@ class ItemDetailsViewModel(
         .filterNotNull()
         .map { item ->
             ItemDetailsUiState(
-                outOfStock = item.quantity <= 0,
+                outOfStock = item.quantity > 0,
                 itemDetails = item.toItemDetails()
             )
         }
@@ -44,7 +44,7 @@ class ItemDetailsViewModel(
         }
     }
 
-    fun sellItem() {
+    fun reduceQuantityByOne() {
         viewModelScope.launch {
             uiState.value.itemDetails.let { itemDetails ->
                 val item = itemDetails.toItem()
@@ -54,6 +54,7 @@ class ItemDetailsViewModel(
             }
         }
     }
+
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L

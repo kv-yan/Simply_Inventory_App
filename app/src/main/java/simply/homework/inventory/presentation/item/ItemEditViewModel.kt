@@ -35,6 +35,7 @@ class ItemEditViewModel(
                 .collect { item ->
                     println(item.toItemDetails())
                     itemUiState = ItemUiState(
+                        isEntryValid = validateInput(item.toItemDetails()),
                         itemDetails = item.toItemDetails()
                     )
                 }

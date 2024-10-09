@@ -100,7 +100,7 @@ fun ItemDetailsScreen(
         ItemDetailsBody(
             itemDetailsUiState = itemDetailsUiState,
             onSellItem = {
-                viewModel.sellItem()
+                viewModel.reduceQuantityByOne()
             },
             onDelete = {
                 viewModel.deleteItem()
@@ -138,7 +138,7 @@ private fun ItemDetailsBody(
             onClick = onSellItem,
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
-            enabled = true
+            enabled = itemDetailsUiState.outOfStock
         ) {
             Text(stringResource(R.string.sell))
         }
